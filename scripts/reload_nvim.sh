@@ -101,7 +101,6 @@ skipped_tab=0
             fi
             continue
         }
-        notify-send "$path"
         nvr --servername "$serverlist" -c "$cmd | e $path"
     done <<<"$files"
 }

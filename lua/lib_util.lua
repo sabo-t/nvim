@@ -18,16 +18,45 @@ function util.contains(table, value)
     return false
 end
 
-
-function util.chomp(s)
-   return s:gsub("\n$", "")
+function util.flatten_2(t)
+    local r = {}
+    for _, j in ipairs(t) do
+        if type(j) == 'table' and type(j[1]) ~= 'table' then
+            table.insert(r, j)
+        elseif type(j) == 'table' and type(j[1]) == 'table' then
+            for _, i in ipairs(j) do table.insert(r, i) end
+        else
+            table.insert(r, j)
+        end
+    end
+    return r
 end
+
+-- function util.flatten_2(t)
+--     local r = {}
+--     for _,j in ipairs(t) do
+--         if type(j) == 'table' and type(j[1]) ~= 'table' then
+--             table.insert(r, j)
+--         else
+--             local q = util.flatten(j)
+--             for _,i in ipairs(q) do
+--                 table.insert(r, i)
+--             end
+--         end
+--     end
+--     return r
+-- end
+
+function util.loaded(t, name)
+    for _, j in ipairs(t) do if j[1] == name then return true end end
+    return false
+end
+
+function util.chomp(s) return s:gsub("\n$", "") end
 
 function util.to_char_array(s)
     local t = {}
-    for c in s:gmatch"." do
-        table.insert(t, c)
-    end
+    for c in s:gmatch "." do table.insert(t, c) end
     return t
 end
 
@@ -43,16 +72,12 @@ function util.get_filename(buffer)
 end
 
 function util.swap_words(word1, word2)
-    local start_line, end_line =
-        unpack(vim.api.nvim_buf_get_mark(0, '<'), 1, 2),
-        unpack(vim.api.nvim_buf_get_mark(0, '>'), 1, 2)
+    local start_line, end_line = unpack(vim.api.nvim_buf_get_mark(0, '<'), 1, 2), unpack(vim.api.nvim_buf_get_mark(0, '>'), 1, 2)
     local temp = "TEMP_WORD_SWAP"
 
     for line = start_line, end_line do
-        local current_line = vim.api
-                                 .nvim_buf_get_lines(0, line - 1, line, false)[1]
-        local modified_line = current_line:gsub(word1, temp):gsub(word2, word1)
-                                  :gsub(temp, word2)
+        local current_line = vim.api.nvim_buf_get_lines(0, line - 1, line, false)[1]
+        local modified_line = current_line:gsub(word1, temp):gsub(word2, word1):gsub(temp, word2)
         vim.api.nvim_buf_set_lines(0, line - 1, line, false, {modified_line})
     end
 end
@@ -267,16 +292,12 @@ function util.terminalScratchPad()
     local wins = v.nvim_list_wins()
     local tabwins = v.nvim_tabpage_list_wins(0)
     for _, i in ipairs(tabwins) do
-        if (string.sub(v.nvim_buf_get_name(v.nvim_win_get_buf(i)), 1, 4) ==
-            "term") then
+        if (string.sub(v.nvim_buf_get_name(v.nvim_win_get_buf(i)), 1, 4) == "term") then
             v.nvim_win_close(i, 0)
             return
         end
     end
-    for _, i in ipairs(wins) do
-        if (string.sub(v.nvim_buf_get_name(v.nvim_win_get_buf(i)), 1, 4) ==
-            "term") then v.nvim_win_close(i, 0) end
-    end
+    for _, i in ipairs(wins) do if (string.sub(v.nvim_buf_get_name(v.nvim_win_get_buf(i)), 1, 4) == "term") then v.nvim_win_close(i, 0) end end
     for _, i in ipairs(bufs) do
         if (string.sub(v.nvim_buf_get_name(i), 1, 4) == "term") then
             vim.cmd(spawnCmd)
@@ -292,15 +313,8 @@ end
 function util.killTerminal()
     local bufs = v.nvim_list_bufs()
     local wins = v.nvim_list_wins()
-    for _, i in ipairs(wins) do
-        if (string.sub(v.nvim_buf_get_name(v.nvim_win_get_buf(i)), 1, 4) ==
-            "term") then v.nvim_win_close(i, 0) end
-    end
-    for _, i in ipairs(bufs) do
-        if (string.sub(v.nvim_buf_get_name(i), 1, 4) == "term") then
-            v.nvim_buf_delete(i, {force = true})
-        end
-    end
+    for _, i in ipairs(wins) do if (string.sub(v.nvim_buf_get_name(v.nvim_win_get_buf(i)), 1, 4) == "term") then v.nvim_win_close(i, 0) end end
+    for _, i in ipairs(bufs) do if (string.sub(v.nvim_buf_get_name(i), 1, 4) == "term") then v.nvim_buf_delete(i, {force = true}) end end
 end
 
 function util.terminalNewSession()
@@ -354,39 +368,28 @@ end
 function util.getTabPageWinNames()
     names = {}
     local tabpageWins = v.nvim_tabpage_list_wins(0)
-    for _, i in ipairs(tabpageWins) do
-        table.insert(names, vim.fs
-                         .basename(v.nvim_buf_get_name(v.nvim_win_get_buf(i))))
-    end
+    for _, i in ipairs(tabpageWins) do table.insert(names, vim.fs.basename(v.nvim_buf_get_name(v.nvim_win_get_buf(i)))) end
     return names
 end
 
 function util.printBaseTabWinNames()
     local tabpageWins = v.nvim_tabpage_list_wins(0)
-    for _, i in ipairs(tabpageWins) do
-        print(vim.fs.basename(v.nvim_buf_get_name(v.nvim_win_get_buf(i))))
-    end
+    for _, i in ipairs(tabpageWins) do print(vim.fs.basename(v.nvim_buf_get_name(v.nvim_win_get_buf(i)))) end
 end
 
 function util.printBaseWinNames()
     local tabpageWins = v.nvim_list_wins()
-    for _, i in ipairs(tabpageWins) do
-        print(vim.fs.basename(v.nvim_buf_get_name(v.nvim_win_get_buf(i))))
-    end
+    for _, i in ipairs(tabpageWins) do print(vim.fs.basename(v.nvim_buf_get_name(v.nvim_win_get_buf(i)))) end
 end
 
 function util.printTabWinNames()
     local tabpageWins = v.nvim_tabpage_list_wins(0)
-    for _, i in ipairs(tabpageWins) do
-        print(v.nvim_buf_get_name(v.nvim_win_get_buf(i)))
-    end
+    for _, i in ipairs(tabpageWins) do print(v.nvim_buf_get_name(v.nvim_win_get_buf(i))) end
 end
 
 function util.printWinNames()
     local tabpageWins = v.nvim_list_wins()
-    for _, i in ipairs(tabpageWins) do
-        print(v.nvim_buf_get_name(v.nvim_win_get_buf(i)))
-    end
+    for _, i in ipairs(tabpageWins) do print(v.nvim_buf_get_name(v.nvim_win_get_buf(i))) end
 end
 
 function util.printWinBufs()
@@ -407,17 +410,11 @@ function util.is_win_float(debug)
         y = y + 1
         x = x + 1
         if debug then
-            print(
-                y .. " <= " .. y_c .. " and " .. y_c .. " <= " .. y + height ..
-                    " and " .. x .. " <= " .. x_c .. " and " .. x_c .. " <= " ..
-                    x + width)
-            print(y <= y_c and y_c <= y + height and x <= x_c and x_c <= x +
-                      width)
+            print(y .. " <= " .. y_c .. " and " .. y_c .. " <= " .. y + height .. " and " .. x .. " <= " .. x_c .. " and " .. x_c .. " <= " .. x + width)
+            print(y <= y_c and y_c <= y + height and x <= x_c and x_c <= x + width)
             print("\n")
         end
-        if y <= y_c and y_c <= y + height and x <= x_c and x_c <= x + width then
-            return true
-        end
+        if y <= y_c and y_c <= y + height and x <= x_c and x_c <= x + width then return true end
         ::continue::
     end
     return false
@@ -436,6 +433,93 @@ end
 
 -- export MANPAGER="sh -c 'col -bx > ~/.cache/.mantemp && nvim ~/.cache/.mantemp'"
 
+function util.MoveToPrevTab()
+    if vim.fn.tabpagenr('$') == 1 and vim.fn.winnr('$') == 1 then return end
 
+    local tab_nr = vim.fn.tabpagenr('$')
+    local cur_buf = vim.fn.bufnr('%')
+
+    if vim.fn.tabpagenr() ~= 1 then
+        vim.cmd('close!')
+        if tab_nr == vim.fn.tabpagenr('$') then vim.cmd('tabprev') end
+        vim.cmd('vs')
+    else
+        vim.cmd('close!')
+        vim.cmd('0tabnew')
+    end
+
+    vim.cmd('b' .. cur_buf)
+end
+
+function util.MoveToNextTab()
+    if vim.fn.tabpagenr('$') == 1 and vim.fn.winnr('$') == 1 then return end
+
+    local tab_nr = vim.fn.tabpagenr('$')
+    local cur_buf = vim.fn.bufnr('%')
+
+    if vim.fn.tabpagenr() < tab_nr then
+        vim.cmd('close!')
+        if tab_nr == vim.fn.tabpagenr('$') then vim.cmd('tabnext') end
+        vim.cmd('vs')
+    else
+        vim.cmd('close!')
+        vim.cmd('tabnew')
+    end
+
+    vim.cmd('b' .. cur_buf)
+end
+
+-- folds
+vim.cmd([[
+function! NextClosedFold(dir)
+    let cmd = 'norm!z'..a:dir
+    let view = winsaveview()
+    let [l0, l, open] = [0, view.lnum, 1]
+    while l != l0 && open
+        exe cmd
+        let [l0, l] = [l, line('.')]
+        let open = foldclosed(l) < 0
+    endwhile
+    if open
+        call winrestview(view)
+    endif
+endfunction
+function! NextClosedFoldOrFoldable(dir)
+    let cmd = 'norm!z'..a:dir
+    let view = winsaveview()
+    let [l0, l, open] = [0, view.lnum, 1]
+    while l != l0 && open
+        exe cmd
+        let [l0, l] = [l, line('.')]
+        let open = foldclosed(l) < 0
+    endwhile
+    let l_closed = l
+    let l_foldable = search('\v^[^-]', 'Wn', line('.') + (a:dir == 'j' ? 1 : -1))
+    if l_foldable <= 0
+        call winrestview(view)
+    else
+        let closest = min([l_closed, l_foldable])
+        exe closest == l_closed ? cmd : 'norm!'.closest
+        call winrestview(view)
+    endif
+endfunction
+nnoremap <silent> <C-k> :call NextClosedFold('j')<cr>zz
+nnoremap <silent> <C-l> :call NextClosedFold('k')<cr>zz
+nnoremap <silent> <C-h> :call NextClosedFoldOrFoldable('k')<cr>zz
+" nnoremap <expr> <c-space> &foldlevel ? 'zMzz' :'zRzz'
+nnoremap <silent> <space>x <space>
+]])
+
+function util.generate_plugin_names()
+    local pluginDir = vim.fn.stdpath('config') .. '/lua'
+    local pluginNames = {}
+
+    for pluginPath in io.popen('ls ' .. pluginDir .. '/plugin_*'):lines() do
+        -- strip the path and the '.lua' extension from the filename
+        local pluginName = pluginPath:match("^.+/(.+)%.lua$")
+        table.insert(pluginNames, pluginName)
+    end
+    return pluginNames
+end
 
 return util

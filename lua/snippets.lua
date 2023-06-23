@@ -1,4 +1,5 @@
--- https://github.com/saadparwaiz1/cmp_luasnip
+-- https://github.com/L3MON4D3/LuaSnip
+
 local os = require "os"
 local ls = require "luasnip"
 local s = ls.snippet
@@ -22,13 +23,6 @@ ls.cleanup()
 
 require("luasnip.loaders.from_vscode").lazy_load()
 
-ls.config.setup({
-    history = false,
-    updateevents = "TextChanged,TextChangedI",
-    delete_check_events = 'TextChanged, InsertLeave, TextChangedI',
-    enable_autosnippets = true,
-    region_check_events = 'CursorMoved',
-})
 
 local constr = function(index)
     return f(function(arg)
