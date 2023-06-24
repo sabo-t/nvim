@@ -63,8 +63,9 @@ vim.keymap.set({"v"}, "<c-k>", ":m '>+1<cr>gv=gv", {silent = true})
 vim.keymap.set({"v"}, "<c-l>", ":m '<-2<cr>gv=gv", {silent = true})
 
 -- splits
-vim.keymap.set({"n", "x"}, "<space>s", "<cmd>vsplit<cr>", {silent = true})
-vim.keymap.set({"n", "x"}, "<space>h", "<cmd>split<cr>", {silent = true})
+vim.keymap.set({"n", "x"}, "<space>s", split.split, {silent = true})
+vim.keymap.set({"n", "x"}, "<space>m", split.promote, {silent = true})
+-- vim.keymap.set({"n", "x"}, "<space>h", "<cmd>split<cr>", {silent = true})
 vim.keymap.set({"n"}, "J", "<C-W>h", {silent = true})
 vim.keymap.set({"n"}, "K", "<C-W>j", {silent = true})
 vim.keymap.set({"n"}, "L", "<C-W>k", {silent = true})
@@ -144,7 +145,7 @@ vim.keymap.set({"n"}, "<space>.", "q::resize 20<cr>", {})
 vim.keymap.set({"n"}, "<space>:", "q::resize 20<cr>", {})
 
 -- quit
-vim.keymap.set({"n"}, "<space>q", "<cmd>q<cr>", {silent = true})
+vim.keymap.set({"n"}, "<space>q", split.quit, {silent = true})
 
 -- change colorscheme
 vim.keymap.set({"n"}, "<space><space>c", cs.next_colorscheme, {silent = false})

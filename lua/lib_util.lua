@@ -384,7 +384,7 @@ end
 
 function util.printTabWinNames()
     local tabpageWins = v.nvim_tabpage_list_wins(0)
-    for _, i in ipairs(tabpageWins) do print(v.nvim_buf_get_name(v.nvim_win_get_buf(i))) end
+    for _, i in ipairs(tabpageWins) do util.notify_send(v.nvim_buf_get_name(v.nvim_win_get_buf(i))) end
 end
 
 function util.printWinNames()
@@ -397,16 +397,22 @@ function util.printWinBufs()
     for _, i in ipairs(tabpageWins) do print(v.nvim_win_get_buf(i)) end
 end
 
-function util.is_win_float(debug)
+function util.is_win_float(handle)
+    handle = handle or v.nvim_get_current_win()
+    local config = v.nvim_win_get_config(handle)
+    return config.relative ~= ''
+end
+
+function util._is_win_float(debug)
     debug = debug or false
-    tabpageWins = v.nvim_tabpage_list_wins(0)
-    win_c = v.nvim_get_current_win()
-    y_c, x_c = unpack(v.nvim_win_get_position(0))
+    local tabpageWins = v.nvim_tabpage_list_wins(0)
+    local win_c = v.nvim_get_current_win()
+    local y_c, x_c = unpack(v.nvim_win_get_position(0))
     for _, i in ipairs(tabpageWins) do
         if i == win_c then goto continue end
-        height = v.nvim_win_get_height(i)
-        width = v.nvim_win_get_width(i)
-        y, x = unpack(v.nvim_win_get_position(i))
+        local height = v.nvim_win_get_height(i)
+        local width = v.nvim_win_get_width(i)
+        local y, x = unpack(v.nvim_win_get_position(i))
         y = y + 1
         x = x + 1
         if debug then
@@ -520,6 +526,38 @@ function util.generate_plugin_names()
         table.insert(pluginNames, pluginName)
     end
     return pluginNames
+end
+
+function util.notify_send(msg)
+    local msg_type = type(msg)
+    local cmd
+
+    if msg_type == 'string' then
+        cmd = 'notify-send "' .. msg .. '"'
+    elseif msg_type == 'number' then
+        cmd = 'notify-send "' .. tostring(msg) .. '"'
+    elseif msg_type == 'table' then
+        cmd = 'notify-send "' .. vim.inspect(msg) .. '"'
+    elseif msg_type == 'nil' then
+        cmd = 'notify-send "nil"'
+    elseif msg_type == 'boolean' then
+        cmd = 'notify-send ' .. tostring(msg)
+    else
+        error("Unsupported data type for notification")
+    end
+
+    os.execute(cmd)
+end
+
+function util.print_all_win_options()
+    local all_options = v.nvim_get_all_options_info()
+    local win_number = v.nvim_get_current_win()
+    local v = vim.wo[win_number]
+    local result = ""
+    for key, val in pairs(all_options) do
+        if val.global_local == false and val.scope == "win" then result = result .. "\n" .. key .. "=" .. tostring(v[key] or "<not set>") end
+    end
+    print(result)
 end
 
 return util

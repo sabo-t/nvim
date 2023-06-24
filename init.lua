@@ -3,7 +3,7 @@ v = vim.api
 st = require('state')
 util = require('lib_util')
 cs = require('lib_cs')
-
+split = require('plugin_split')
 mappings = require('mappings')
 
 require('plugins')
@@ -57,7 +57,7 @@ vim.opt.hls = false
 vim.opt.incsearch = true
 vim.opt.ignorecase = true
 vim.opt.inccommand = "nosplit"
-vim.opt.cmdheight = 0 -- 0 causes issues with :search functions 'w'
+vim.opt.cmdheight = 0
 vim.opt.lazyredraw = false
 vim.opt.title = true
 vim.opt.laststatus = 3
